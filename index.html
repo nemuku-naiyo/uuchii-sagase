@@ -268,7 +268,12 @@
 (function(){
   var box=document.getElementById('err');
   function show(m){ box.hidden=false; box.textContent=(box.textContent?box.textContent+' / ':'')+m; }
-  window.addEventListener('error',function(e){ var t=e.target; if(t&&t.tagName==='SCRIPT'){ show('読み込み失敗: '+(t.src||'').split('/').pop()); return; } if(e.message) show('エラー: '+e.message+(e.lineno?' (行'+e.lineno+')':'')); },true);
+  window.addEventListener('error',function(e){
+    var t=e.target; if(t&&t.tagName==='SCRIPT'){ show('読み込み失敗: '+(t.src||'').split('/').pop()); return; }
+    // 「Script error.」は、ゲームの外（ブラウザの共有メニューや拡張機能など）で起きたエラーで、中身が見えない。ゲームには関係ないので出さない
+    if (!e.message || /^Script error\.?$/.test(e.message) && !e.filename) return;
+    show('エラー: '+e.message+(e.lineno?' (行'+e.lineno+')':''));
+  },true);
   window.addEventListener('unhandledrejection',function(e){ show('エラー: '+((e.reason&&e.reason.message)||e.reason)); });
 })();
 </script>
